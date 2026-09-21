@@ -66,3 +66,46 @@
     gap: 10px;
   }
 }
+
+.team-scroll {
+  list-style: none;
+  padding: 0;
+  margin: 16px auto 0;
+  max-width: 900px;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.team-scroll li {
+  padding: 8px 12px;
+  color: black;
+  border-bottom: 1px solid var(--border);
+
+}
+
+.team-list {
+  width: 30%;
+}
+
+
+.team-scroll li:last-child {
+  border-bottom: none;
+}
+
+
+.start-btn {
+  margin-top: 32px;
+  padding: 16px 48px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  background: #22c55e;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.start-btn:hover {
+  background: #16a34a;
+}
