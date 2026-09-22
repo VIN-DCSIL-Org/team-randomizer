@@ -10,11 +10,11 @@ function getTeams(setTeams) {
 }
 
 
-function startPresentation(teams, setSelectedTeam) {
-  const randomIndex = Math.floor(Math.random() * teams.length)
-  const team = teams[randomIndex]
-  setSelectedTeam(team)
-}
+// function startPresentation(teams, setSelectedTeam) {
+//   const randomIndex = Math.floor(Math.random() * teams.length)
+//   const team = teams[randomIndex]
+//   setSelectedTeam(team)
+// }
 
 function Home() {
   const [teams, setTeams] = useState([])
@@ -54,7 +54,7 @@ function Home() {
         </ul>
       </section>
 
-      <button type="button" className="start-btn" onClick={() => startPresentation(teams, setSelectedTeam)}>Start Presentations</button>
+      <button type="button" className="start-btn">Start Presentations</button>
 
     </main>
   )
