@@ -36,9 +36,9 @@ async def get_teams():
     return [team.to_dict()["TeamName"] for team in teams]
 
 
-@app.post("/teams", status_code=201)
-async def create_team(team: TeamRequest):
-    team_name = team.team_name.strip()
+@app.post("/teams/{team_name}", status_code=201)
+async def create_team(team_name: str):
+    team_name = team_name.strip()
     if not team_name:
         raise HTTPException(status_code=400, detail="team_name cannot be empty")
 
