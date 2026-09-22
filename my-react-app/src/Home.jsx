@@ -1,6 +1,44 @@
 import './App.css'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+
+
+function getTeams(setTeams) {
+  fetch('http://localhost:3000/api/teams')
+    .then((response) => response.json())
+    .then((data) => setTeams(data))
+}
+
+
+// function startPresentation(teams, setSelectedTeam) {
+//   const randomIndex = Math.floor(Math.random() * teams.length)
+//   const team = teams[randomIndex]
+//   setSelectedTeam(team)
+// }
 
 function Home() {
+  const [teams, setTeams] = useState([])
+  const [selectedTeam, setSelectedTeam] = useState('')
+  const [presentationTime, setPresentationTime] = useState('')
+  const [qaTime, setQaTime] = useState('')
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    getTeams(setTeams)
+  }, [])
+
+  const handleStart = () => {
+  if (!presentationTime || !qaTime) {
+    alert('Please enter both Presentation time and Q&A time.')
+    return
+  }
+
+  navigate('/presentation-view', {
+    state: { teams, presentationTime, qaTime },
+  })
+}
+
   return (
     <main className="homepage">
       <h1>Team Randomizer</h1>
@@ -9,22 +47,35 @@ function Home() {
         <div className="time-fields">
           <div className="time-group">
             <h3>Presentation</h3>
-            <input id="presentation-time" type="number" min="0" step="1" />
+            <input id="presentation-time" type="number" min="0" step="1" value={presentationTime} onChange={(e) => setPresentationTime(e.target.value)} />
           </div>
 
           <div className="time-group">
             <h3>Q&A</h3>
-            <input id="qa-time" type="number" min="0" step="1" />
+            <input id="qa-time" type="number" min="0" step="1" value={qaTime} onChange={(e) => setQaTime(e.target.value)} />
           </div>
         </div>
       </section>
 
       <div style={{ height: '100px' }}></div>
 
-      
       <section className="team-list">
-        <h2>Team List</h2>
+        <h2>Teams</h2>
+
+        <ul className="team-scroll">
+          {teams.map((team, index) => (
+            <li key={index}>{team}</li>
+          ))}
+        </ul>
       </section>
+
+      <button
+        type="button"
+        className="green-btn"
+        onClick={handleStart}
+      >
+        Start Presentations
+      </button>
     </main>
   )
 }
