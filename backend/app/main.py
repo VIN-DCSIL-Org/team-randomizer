@@ -12,7 +12,11 @@ service_account_path = os.getenv(
     "FIREBASE_SERVICE_ACCOUNT_PATH",
     str(Path(__file__).resolve().parents[1] / "serviceAccountKey.json"),
 )
-db = firestore.Client.from_service_account_json(service_account_path)
+db = (
+    firestore.Client.from_service_account_json(service_account_path)
+    if Path(service_account_path).is_file()
+    else None
+)
 
 app = FastAPI(
     title="My Project API",
@@ -37,13 +41,22 @@ class TeamRequest(BaseModel):
     team_name: str
 
 
+def get_firestore():
+    if db is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Firestore is unavailable. Add serviceAccountKey.json or set FIREBASE_SERVICE_ACCOUNT_PATH.",
+        )
+    return db
+
+
 @app.get("/")
 async def root():
     return {"message": "API is running"}
 
 @app.get("/teams")
 async def get_teams():
-    teams_ref = db.collection("teams")
+    teams_ref = get_firestore().collection("teams")
     teams = teams_ref.get()
     return [team.to_dict()["TeamName"] for team in teams]
 
@@ -54,8 +67,9 @@ async def create_team(team_name: str):
     if not team_name:
         raise HTTPException(status_code=400, detail="team_name cannot be empty")
 
+    firestore_db = get_firestore()
     existing_team = (
-        db.collection("teams")
+        firestore_db.collection("teams")
         .where("TeamName", "==", team_name)
         .limit(1)
         .get()
@@ -63,7 +77,7 @@ async def create_team(team_name: str):
     if existing_team:
         raise HTTPException(status_code=409, detail="Team already exists")
 
-    team_ref = db.collection("teams").document()
+    team_ref = firestore_db.collection("teams").document()
     team_ref.set({"TeamName": team_name})
     return {"id": team_ref.id, "team_name": team_name}
 
@@ -71,8 +85,9 @@ async def create_team(team_name: str):
 @app.delete("/teams/{team_name}")
 async def delete_team(team_name: str):
     team_name = team_name.strip()
+    firestore_db = get_firestore()
     matching_teams = (
-        db.collection("teams")
+        firestore_db.collection("teams")
         .where("TeamName", "==", team_name)
         .limit(1)
         .get()
