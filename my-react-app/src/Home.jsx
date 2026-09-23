@@ -5,13 +5,13 @@ import { useNavigate } from 'react-router-dom'
 
 
 function getTeams(setTeams) {
-  fetch('http://localhost:3000/api/teams')
+  fetch('http://localhost:8000/teams')
     .then((response) => response.json())
     .then((data) => setTeams(data))
 }
 
 function createTeam(teamName, onSuccess) {
-  fetch(`http://localhost:3000/api/teams/${encodeURIComponent(teamName)}`, {
+  fetch(`http://localhost:8000/teams/${encodeURIComponent(teamName)}`, {
     method: 'POST',
   }).then((response) => {
     if (!response.ok) {
@@ -25,7 +25,7 @@ function createTeam(teamName, onSuccess) {
 }
 
 function deleteTeam(teamName, onSuccess) {
-  fetch(`http://localhost:3000/api/teams/${encodeURIComponent(teamName)}`, {
+  fetch(`http://localhost:8000/teams/${encodeURIComponent(teamName)}`, {
     method: 'DELETE',
   }).then((response) => {
     if (!response.ok) {
@@ -47,7 +47,8 @@ function deleteTeam(teamName, onSuccess) {
 
 function Home() {
   const [teams, setTeams] = useState([])
-  const [selectedTeam, setSelectedTeam] = useState('')
+  const [isAddingTeam, setIsAddingTeam] = useState(false)
+  const [newTeamName, setNewTeamName] = useState('')
   const [presentationTime, setPresentationTime] = useState('')
   const [qaTime, setQaTime] = useState('')
   const navigate = useNavigate()
@@ -68,7 +69,13 @@ function Home() {
 }
 
   const handleAddTeam = () => {
-    const teamName = window.prompt('Enter a new team name')?.trim()
+    setIsAddingTeam(true)
+    setNewTeamName('')
+  }
+
+  const handleSaveTeam = (event) => {
+    event.preventDefault()
+    const teamName = newTeamName.trim()
 
     if (!teamName) {
       return
@@ -76,7 +83,14 @@ function Home() {
 
     createTeam(teamName, () => {
       getTeams(setTeams)
+      setNewTeamName('')
+      setIsAddingTeam(false)
     })
+  }
+
+  const handleCancelAdd = () => {
+    setNewTeamName('')
+    setIsAddingTeam(false)
   }
 
   const handleDeleteTeam = (teamName) => {
@@ -130,6 +144,22 @@ function Home() {
               </button>
             </li>
           ))}
+          {isAddingTeam && (
+            <li className="team-item team-add-row">
+              <form className="team-add-form" onSubmit={handleSaveTeam}>
+                <input
+                  type="text"
+                  value={newTeamName}
+                  onChange={(event) => setNewTeamName(event.target.value)}
+                  placeholder="Enter team name"
+                  autoFocus
+                  aria-label="New team name"
+                />
+                <button type="submit" className="team-save-btn">Save</button>
+                <button type="button" className="team-cancel-btn" onClick={handleCancelAdd}>Cancel</button>
+              </form>
+            </li>
+          )}
         </ul>
       </section>
 
