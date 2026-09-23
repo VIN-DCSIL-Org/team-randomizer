@@ -25,6 +25,9 @@ function PresentationView() {
     if (phase === 'presentation' && presentationSeconds <= 120) {
       setWarnTwoMinutes(true)
     }
+    else {
+      setWarnTwoMinutes(false)
+    }
   }, [phase, presentationSeconds])
 
   function handleTimerComplete() {
@@ -43,6 +46,8 @@ function PresentationView() {
   }, [])
 
   function nextTeam() {
+    setPhase('presentation')
+    setTimerStarted(false)
     if (teams.length === 0) {
       navigate('/', { replace: true })
       return
@@ -89,9 +94,17 @@ function PresentationView() {
           {timerStarted ? 'Stop' : 'Start'}
         </button>
 
-        <button className="green-btn" type="button" onClick={nextTeam}>
-          Next Team
-        </button>
+        {phase === 'presentation' && (
+          <button className="green-btn" type="button"   style={{ backgroundColor: '#2563eb' }} onClick={() => { setPhase('qa'); setTimerStarted(true); }}>
+            Q & A
+          </button>
+        )}
+
+        {phase === 'qa' && (
+          <button className="green-btn" type="button" onClick={() => nextTeam()}>
+            Next Team
+          </button>
+        )}
       </div>
 
       {warnTwoMinutes && phase === 'presentation' && (

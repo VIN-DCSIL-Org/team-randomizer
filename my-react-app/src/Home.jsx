@@ -71,7 +71,7 @@ function Home() {
 
       <button
         type="button"
-        className="green-btn"
+        className="green-btn start-btn"
         onClick={handleStart}
       >
         Start Presentations
