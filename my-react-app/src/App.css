@@ -238,6 +238,23 @@
   background: #16a34a;
 }
 
+.red-btn {
+  margin-top: 32px;
+  padding: 16px 48px;
+  width: 200px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  background: #dc2626;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.red-btn:hover {
+  background: #b91c1c;
+}
+
 .presentation-page {
   min-height: 100vh;
   display: flex;

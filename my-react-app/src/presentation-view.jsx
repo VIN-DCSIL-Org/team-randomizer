@@ -90,9 +90,16 @@ function PresentationView() {
       </div>
 
       <div className="button-row">
-        <button className="green-btn" type="button" onClick={() => setTimerStarted((current) => !current)}>
-          {timerStarted ? 'Stop' : 'Start'}
-        </button>
+        {timerStarted ? (
+          <button className="red-btn" type="button" onClick={() => setTimerStarted((current) => !current)}>
+            Pause
+          </button>
+        ) : (
+          <button className="green-btn" type="button" onClick={() => setTimerStarted((current) => !current)}>
+            Start
+          </button>
+        )}
+
 
         {phase === 'presentation' && (
           <button className="green-btn" type="button"   style={{ backgroundColor: '#2563eb' }} onClick={() => { setPhase('qa'); setTimerStarted(true); }}>

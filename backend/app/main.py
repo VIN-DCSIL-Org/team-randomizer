@@ -83,3 +83,50 @@ async def delete_team(team_name: str):
     team_ref = matching_teams[0].reference
     team_ref.delete()
     return {"team_name": team_name, "deleted": True}
+
+
+teams_txt_path = Path(__file__).resolve().parents[1] / "teams.txt"
+
+
+@app.get("/teamstxt")
+async def get_teams():
+    if not teams_txt_path.exists():
+        return []
+
+    return [
+        team_name
+        for team_name in teams_txt_path.read_text(encoding="utf-8").splitlines()
+        if team_name.strip()
+    ]
+
+
+@app.post("/teamstxt/{team_name}", status_code=201)
+async def create_team(team_name: str):
+    team_name = team_name.strip()
+    if not team_name:
+        raise HTTPException(status_code=400, detail="team_name cannot be empty")
+
+    teams = await get_teams()
+    if team_name in teams:
+        raise HTTPException(status_code=409, detail="Team already exists")
+
+    with teams_txt_path.open("a", encoding="utf-8") as teams_file:
+        teams_file.write(f"\n{team_name}\n")
+
+    return {"team_name": team_name}
+
+
+@app.delete("/teamstxt/{team_name}")
+async def delete_team(team_name: str):
+    team_name = team_name.strip()
+    teams = await get_teams()
+    if team_name not in teams:
+        raise HTTPException(status_code=404, detail="Team not found")
+
+    remaining_teams = [team for team in teams if team != team_name]
+    teams_txt_path.write_text(
+        "\n".join(remaining_teams) + ("\n" if remaining_teams else ""),
+        encoding="utf-8",
+    )
+
+    return {"team_name": team_name, "deleted": True}

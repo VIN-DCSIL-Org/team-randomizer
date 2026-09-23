@@ -5,13 +5,13 @@ import { useNavigate } from 'react-router-dom'
 
 
 function getTeams(setTeams) {
-  fetch('http://localhost:8000/teams')
+  fetch('http://localhost:8000/teamstxt')
     .then((response) => response.json())
     .then((data) => setTeams(data))
 }
 
 function createTeam(teamName, onSuccess) {
-  fetch(`http://localhost:8000/teams/${encodeURIComponent(teamName)}`, {
+  fetch(`http://localhost:8000/teamstxt/${encodeURIComponent(teamName)}`, {
     method: 'POST',
   }).then((response) => {
     if (!response.ok) {
@@ -25,7 +25,7 @@ function createTeam(teamName, onSuccess) {
 }
 
 function deleteTeam(teamName, onSuccess) {
-  fetch(`http://localhost:8000/teams/${encodeURIComponent(teamName)}`, {
+  fetch(`http://localhost:8000/teamstxt/${encodeURIComponent(teamName)}`, {
     method: 'DELETE',
   }).then((response) => {
     if (!response.ok) {
