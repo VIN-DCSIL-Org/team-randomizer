@@ -97,6 +97,44 @@
   text-align: left;
 }
 
+.team-add-row {
+  padding: 10px 12px !important;
+}
+
+.team-add-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.team-add-form input {
+  min-width: 0;
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+}
+
+.team-save-btn,
+.team-cancel-btn {
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.team-save-btn {
+  color: #fff;
+  background: #16a34a;
+}
+
+.team-cancel-btn {
+  color: #374151;
+  background: #e5e7eb;
+}
+
 .team-delete-btn {
   width: 34px;
   height: 34px;
@@ -198,6 +236,23 @@
 }
 .green-btn:hover {
   background: #16a34a;
+}
+
+.red-btn {
+  margin-top: 32px;
+  padding: 16px 48px;
+  width: 200px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  background: #dc2626;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.red-btn:hover {
+  background: #b91c1c;
 }
 
 .presentation-page {
