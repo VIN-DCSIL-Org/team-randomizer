@@ -3,7 +3,7 @@ name: Terraform
 on:
   push:
     branches:
-      - 18-terraform
+      - 18-terraform-apigw-lambda
   workflow_dispatch:
     inputs:
       action:
