@@ -14,3 +14,20 @@ output "apigatewayv2_access_check" {
   value       = data.aws_apigatewayv2_apis.check_access.ids
 }
 
+resource "aws_apigatewayv2_api" "this" {
+  name          = "team-randomizer-api"
+  protocol_type = "HTTP"
+}
+
+resource "aws_apigatewayv2_stage" "this" {
+  api_id      = aws_apigatewayv2_api.this.id
+  name        = "$default"
+  auto_deploy = true
+}
+
+output "http_api_endpoint" {
+  description = "Invoke URL for the HTTP API"
+  value       = aws_apigatewayv2_api.this.api_endpoint
+}
+
+
