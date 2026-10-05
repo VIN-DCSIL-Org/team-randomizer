@@ -19,15 +19,20 @@ jobs:
     outputs:
       image-uri: ${{ steps.output-image.outputs.image-uri }}
 
+    env:
+      HAS_AWS_ROLE: ${{ secrets.AWS_TF_ROLE_ARN != '' }}
+
     steps:
       - name: Check out source
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (OIDC)
+        # skip entirely if the role secret isn't configured yet, so init-only runs still work
+        if: ${{ env.HAS_AWS_ROLE == 'true' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_TF_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ca-central-1
 
       - name: Log in to Amazon ECR
         id: login-ecr
