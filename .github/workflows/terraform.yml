@@ -35,6 +35,8 @@ jobs:
           terraform_version: "1.9.5"
 
       - name: Configure AWS credentials (OIDC)
+        # skip entirely if the role secret isn't configured yet, so init-only runs still work
+        if: ${{ secrets.AWS_TF_ROLE_ARN != '' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_TF_ROLE_ARN }}
@@ -44,8 +46,8 @@ jobs:
         run: terraform init
 
       - name: Terraform Plan
-        # push events have no inputs.action, so default to plan
-        if: github.event_name == 'push' || inputs.action == 'plan'
+        # push events have no inputs.action, so default to plan; requires credentials
+        if: ${{ (github.event_name == 'push' || inputs.action == 'plan') && secrets.AWS_TF_ROLE_ARN != '' }}
         run: terraform plan
 
       - name: Terraform Apply
