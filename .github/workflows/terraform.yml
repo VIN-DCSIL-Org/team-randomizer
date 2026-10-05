@@ -22,7 +22,7 @@ permissions:
 
 defaults:
   run:
-    working-directory: terraform
+    working-directory: terraform 
 
 jobs:
   terraform:
