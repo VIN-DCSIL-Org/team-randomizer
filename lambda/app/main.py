@@ -39,7 +39,7 @@ db = init_firestore()
 
 app = FastAPI(
     title="My Project API",
-    version="0.1.0",
+    version="0.1.1",
 )
 
 # NOTE: If you configured CORS directly in API Gateway's `cors_configuration`,
