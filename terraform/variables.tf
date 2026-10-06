@@ -13,7 +13,7 @@ variable "environment" {
 variable "lambda_function_name" {
   description = "Name to give the Lambda function"
   type        = string
-  default     = "team_randomizer_lambda"
+  default     = "team_randomizer_lambda-prd"
 }
 
 variable "lambda_image_uri" {
