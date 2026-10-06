@@ -31,3 +31,49 @@ output "http_api_endpoint" {
 }
 
 
+
+
+# # IAM role is created and managed outside Terraform; only needs iam:PassRole here.
+# resource "aws_lambda_function" "this" {
+#   function_name = var.lambda_function_name
+#   role          = var.lambda_exec_role_arn
+#   package_type  = "Image"
+#   image_uri     = var.lambda_image_uri
+# }
+
+# resource "aws_apigatewayv2_integration" "lambda" {
+#   api_id                 = aws_apigatewayv2_api.this.id
+#   integration_type       = "AWS_PROXY"
+#   integration_uri        = aws_lambda_function.this.invoke_arn
+#   payload_format_version = "2.0"
+# }
+
+resource "aws_apigatewayv2_authorizer" "cognito" {
+  api_id           = aws_apigatewayv2_api.this.id
+  authorizer_type  = "JWT"
+  identity_sources = ["$request.header.Authorization"]
+  name             = "cognito-jwt-authorizer"
+
+  jwt_configuration {
+    audience = var.cognito_audience
+    issuer   = var.cognito_issuer
+  }
+}
+
+resource "aws_apigatewayv2_route" "lambda_proxy" {
+  api_id             = aws_apigatewayv2_api.this.id
+  route_key          = "ANY /team_randomizer_lambda/{proxy+}"
+  target             = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito.id
+}
+
+resource "aws_lambda_permission" "apigw" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.this.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.this.execution_arn}/*/*"
+}
+
+
