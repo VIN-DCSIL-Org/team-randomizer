@@ -60,20 +60,20 @@ resource "aws_apigatewayv2_authorizer" "cognito" {
   }
 }
 
-resource "aws_apigatewayv2_route" "lambda_proxy" {
-  api_id             = aws_apigatewayv2_api.this.id
-  route_key          = "ANY /team_randomizer_lambda/{proxy+}"
-  target             = "integrations/${aws_apigatewayv2_integration.lambda.id}"
-  authorization_type = "JWT"
-  authorizer_id      = aws_apigatewayv2_authorizer.cognito.id
-}
+# resource "aws_apigatewayv2_route" "lambda_proxy" {
+#   api_id             = aws_apigatewayv2_api.this.id
+#   route_key          = "ANY /team_randomizer_lambda/{proxy+}"
+#   target             = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+#   authorization_type = "JWT"
+#   authorizer_id      = aws_apigatewayv2_authorizer.cognito.id
+# }
 
-resource "aws_lambda_permission" "apigw" {
-  statement_id  = "AllowAPIGatewayInvoke"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.this.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.this.execution_arn}/*/*"
-}
+# resource "aws_lambda_permission" "apigw" {
+#   statement_id  = "AllowAPIGatewayInvoke"
+#   action        = "lambda:InvokeFunction"
+#   function_name = aws_lambda_function.this.function_name
+#   principal     = "apigateway.amazonaws.com"
+#   source_arn    = "${aws_apigatewayv2_api.this.execution_arn}/*/*"
+# }
 
 
