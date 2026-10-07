@@ -50,10 +50,14 @@ jobs:
       - name: Terraform Plan
         # push events have no inputs.action, so default to plan; requires credentials
         if: ${{ (github.event_name == 'push' || inputs.action == 'plan') && env.HAS_AWS_ROLE == 'true' }}
+        env:
+          TF_VAR_firebase_service_account_json: ${{ secrets.SERVICEACCOUNTKEY }}
         run: terraform plan
 
       - name: Terraform Apply
         if: github.event_name == 'workflow_dispatch' && inputs.action == 'apply'
+        env:
+          TF_VAR_firebase_service_account_json: ${{ secrets.SERVICEACCOUNTKEY }}
         run: terraform apply -auto-approve
 
       - name: Terraform Destroy
