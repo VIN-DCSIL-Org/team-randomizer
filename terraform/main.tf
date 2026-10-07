@@ -39,6 +39,14 @@ resource "aws_lambda_function" "this" {
   role          = var.lambda_exec_role_arn
   package_type  = "Image"
   image_uri     = var.lambda_image_uri
+
+  dynamic "environment" {
+    for_each = length(merge(var.lambda_environment_variables, var.firebase_service_account_json != "" ? { FIREBASE_SERVICE_ACCOUNT_JSON = var.firebase_service_account_json } : {})) > 0 ? [1] : []
+
+    content {
+      variables = merge(var.lambda_environment_variables, var.firebase_service_account_json != "" ? { FIREBASE_SERVICE_ACCOUNT_JSON = var.firebase_service_account_json } : {})
+    }
+  }
 }
 
 resource "aws_apigatewayv2_integration" "lambda" {

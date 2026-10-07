@@ -28,6 +28,19 @@ variable "lambda_exec_role_arn" {
   default     = "arn:aws:iam::660261898478:role/service-role/team_randomizer_lambda-role-syo2pjmd"
 }
 
+variable "lambda_environment_variables" {
+  description = "Environment variables to inject into the Lambda function"
+  type        = map(string)
+  default     = {}
+}
+
+variable "firebase_service_account_json" {
+  description = "Firebase service account JSON from GitHub Actions secret"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 variable "cognito_issuer" {
   description = "Issuer URI of the Cognito user pool used for JWT authorization"
   type        = string
