@@ -74,49 +74,50 @@ async def root():
 
 
 @app.get("/team_randomizer_lambda/teams")
-async def get_teams_L():
-    teams_ref = get_firestore().collection("teams")
-    teams = teams_ref.get()
-    return [team.to_dict().get("TeamName") for team in teams]
+async def get_teams_L(userId: str):
+    user_ref = get_firestore().collection("team_list").document(userId)
+    user_document = user_ref.get()
+
+    if not user_document.exists:
+        return []
+
+    return user_document.to_dict().get("Teams", [])
 
 
 @app.post("/team_randomizer_lambda/teams/{team_name}", status_code=201)
-async def create_team(team_name: str):
+async def create_team(team_name: str, userId: str):
     team_name = team_name.strip()
     if not team_name:
         raise HTTPException(status_code=400, detail="team_name cannot be empty")
 
     firestore_db = get_firestore()
-    existing_team = (
-        firestore_db.collection("teams")
-        .where("TeamName", "==", team_name)
-        .limit(1)
-        .get()
-    )
-    if existing_team:
+    user_ref = firestore_db.collection("team_list").document(userId)
+    user_document = user_ref.get()
+
+    if not user_document.exists:
+        user_ref.set({"Teams": [team_name]})
+        return {"user_id": userId, "team_name": team_name}
+
+    existing_teams = user_document.to_dict().get("Teams", [])
+
+    if team_name in existing_teams:
         raise HTTPException(status_code=409, detail="Team already exists")
 
-    team_ref = firestore_db.collection("teams").document()
-    team_ref.set({"TeamName": team_name})
-    return {"id": team_ref.id, "team_name": team_name}
+    user_ref.update({"Teams": firestore.ArrayUnion([team_name])})
+    return {"user_id": userId, "team_name": team_name}
 
 
 @app.delete("/team_randomizer_lambda/teams/{team_name}")
-async def delete_team(team_name: str):
+async def delete_team(team_name: str, userId: str):
     team_name = team_name.strip()
-    firestore_db = get_firestore()
-    matching_teams = (
-        firestore_db.collection("teams")
-        .where("TeamName", "==", team_name)
-        .limit(1)
-        .get()
-    )
-    if not matching_teams:
+    user_ref = get_firestore().collection("team_list").document(userId)
+    user_document = user_ref.get()
+
+    if not user_document.exists or team_name not in user_document.to_dict().get("Teams", []):
         raise HTTPException(status_code=404, detail="Team not found")
 
-    team_ref = matching_teams[0].reference
-    team_ref.delete()
-    return {"team_name": team_name, "deleted": True}
+    user_ref.update({"Teams": firestore.ArrayRemove([team_name])})
+    return {"user_id": userId, "team_name": team_name, "deleted": True}
 
 
 # The entrypoint for AWS Lambda:
