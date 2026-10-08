@@ -126,6 +126,18 @@ _mangum_handler = Mangum(app, lifespan="off")
 
 def handler(event, context):
     print(f"API Gateway event: {json.dumps(event, default=str)}")
+
+    if event.get("requestContext", {}).get("http", {}).get("method") == "OPTIONS":
+        return {
+            "statusCode": 200,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Content-Type,Authorization",
+                "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
+            },
+            "body": "",
+        }
+
     response = _mangum_handler(event, context)
     print(f"Lambda response: {json.dumps(response, default=str)}")
     return response
