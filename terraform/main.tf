@@ -9,6 +9,12 @@
 # Read-only check that the role can reach API Gateway (lists existing HTTP/WebSocket APIs)
 data "aws_apigatewayv2_apis" "check_access" {}
 
+data "aws_ecr_image" "lambda" {
+  repository_name = var.lambda_ecr_repository
+  image_tag       = var.lambda_image_tag
+  most_recent     = true
+}
+
 output "apigatewayv2_access_check" {
   description = "IDs of existing API Gateway v2 APIs visible to this role (proves API Gateway read access)"
   value       = data.aws_apigatewayv2_apis.check_access.ids
@@ -38,7 +44,7 @@ resource "aws_lambda_function" "this" {
   function_name = var.lambda_function_name
   role          = var.lambda_exec_role_arn
   package_type  = "Image"
-  image_uri     = var.lambda_image_uri
+  image_uri     = data.aws_ecr_image.lambda.image_uri
 
   dynamic "environment" {
     for_each = length(merge(var.lambda_environment_variables, var.firebase_service_account_json != "" ? { FIREBASE_SERVICE_ACCOUNT_JSON = var.firebase_service_account_json } : {})) > 0 ? [1] : []

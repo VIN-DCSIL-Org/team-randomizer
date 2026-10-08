@@ -16,10 +16,16 @@ variable "lambda_function_name" {
   default     = "team_randomizer_lambda-prd"
 }
 
-variable "lambda_image_uri" {
-  description = "ECR image URI (with tag/digest) for the Lambda function, passed in from GitHub Actions"
+variable "lambda_ecr_repository" {
+  description = "ECR repository name for the Lambda image"
   type        = string
-  default     = "660261898478.dkr.ecr.ca-central-1.amazonaws.com/csc491/team-randomizer:eed75a64a872a0cab865e608db591f104661d1dc"
+  default     = "csc491/team-randomizer"
+}
+
+variable "lambda_image_tag" {
+  description = "ECR image tag for the Lambda function"
+  type        = string
+  default     = "latest"
 }
 
 variable "lambda_exec_role_arn" {
