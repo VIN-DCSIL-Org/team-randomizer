@@ -24,7 +24,7 @@ resource "aws_apigatewayv2_api" "this" {
   protocol_type = "HTTP"
 
   cors_configuration {
-    allow_origins = ["https://*.dm3yb2zf1rkq0.amplifyapp.com"]
+    allow_origins = ["https://mvp.dm3yb2zf1rkq0.amplifyapp.com"]
     allow_methods = ["*"]
     allow_headers = ["*"]
     expose_headers = ["*"]
