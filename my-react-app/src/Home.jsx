@@ -2,65 +2,82 @@ import './App.css'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { fetchAuthSession } from 'aws-amplify/auth'
+import { fetchAuthSession, getCurrentUser } from 'aws-amplify/auth'
+
+const API_BASE_URL = 'https://ibcfji5mk2.execute-api.ca-central-1.amazonaws.com/team_randomizer_lambda'
+
 async function getAccessToken() {
   try {
     const session = await fetchAuthSession()
 
-    const accessToken = session.tokens?.accessToken?.toString()
-
-    console.log(accessToken)
+    return session.tokens?.accessToken?.toString() ?? ''
   } catch (error) {
     console.error('Could not get token:', error)
+    return ''
+  }
+}
+
+async function getAuthHeaders() {
+  const token = await getAccessToken()
+
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
+async function getUserId() {
+  try {
+    const user = await getCurrentUser()
+
+    return user.userId
+  } catch (error) {
+    console.error('Could not get current user:', error)
+    return ''
   }
 }
 
 async function getTeams(setTeams) {
-
-  fetch('http://localhost:8000/teamstxt', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  const userId = await getUserId()
+  const response = await fetch(`${API_BASE_URL}/teams?userId=${encodeURIComponent(userId)}`, {
+    headers: await getAuthHeaders(),
   })
-    .then((response) => response.json())
-    .then((data) => setTeams(data))
-    
+
+  if (!response.ok) {
+    throw new Error('Unable to load teams')
+  }
+
+  const data = await response.json()
+  setTeams(data)
 }
 
-function createTeam(teamName, onSuccess) {
-  fetch(`http://localhost:8000/teamstxt/${encodeURIComponent(teamName)}`, {
+async function createTeam(teamName, onSuccess) {
+  const userId = await getUserId()
+  const response = await fetch(`${API_BASE_URL}/teams/${encodeURIComponent(teamName)}?userId=${encodeURIComponent(userId)}`, {
     method: 'POST',
-  }).then((response) => {
-    if (!response.ok) {
-      return response.json().then((error) => {
-        throw new Error(error.detail || 'Unable to add team')
-      })
-    }
-
-    onSuccess()
+    headers: await getAuthHeaders(),
   })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}))
+    throw new Error(error.detail || 'Unable to add team')
+  }
+
+  onSuccess()
 }
 
-function deleteTeam(teamName, onSuccess) {
-  fetch(`http://localhost:8000/teamstxt/${encodeURIComponent(teamName)}`, {
+async function deleteTeam(teamName, onSuccess) {
+  const userId = await getUserId()
+  const response = await fetch(`${API_BASE_URL}/teams/${encodeURIComponent(teamName)}?userId=${encodeURIComponent(userId)}`, {
     method: 'DELETE',
-  }).then((response) => {
-    if (!response.ok) {
-      return response.json().then((error) => {
-        throw new Error(error.detail || 'Unable to delete team')
-      })
-    }
-
-    onSuccess()
+    headers: await getAuthHeaders(),
   })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}))
+    throw new Error(error.detail || 'Unable to delete team')
+  }
+
+  onSuccess()
 }
 
-
-// function startPresentation(teams, setSelectedTeam) {
-//   const randomIndex = Math.floor(Math.random() * teams.length)
-//   const team = teams[randomIndex]
-//   setSelectedTeam(team)
-// }
 
 function Home() {
   const [teams, setTeams] = useState([])
@@ -71,19 +88,21 @@ function Home() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    getTeams(setTeams)
+    getTeams(setTeams).catch((error) => {
+      console.error(error)
+    })
   }, [])
 
   const handleStart = () => {
-  if (!presentationTime || !qaTime) {
-    alert('Please enter both Presentation time and Q&A time.')
-    return
-  }
+    if (!presentationTime || !qaTime) {
+      alert('Please enter both Presentation time and Q&A time.')
+      return
+    }
 
-  navigate('/presentation-view', {
-    state: { teams, presentationTime, qaTime },
-  })
-}
+    navigate('/presentation-view', {
+      state: { teams, presentationTime, qaTime },
+    })
+  }
 
   const handleAddTeam = () => {
     setIsAddingTeam(true)
@@ -99,9 +118,14 @@ function Home() {
     }
 
     createTeam(teamName, () => {
-      getTeams(setTeams)
+      getTeams(setTeams).catch((error) => {
+        console.error(error)
+      })
       setNewTeamName('')
       setIsAddingTeam(false)
+    }).catch((error) => {
+      console.error(error)
+      alert(error.message)
     })
   }
 
@@ -112,7 +136,12 @@ function Home() {
 
   const handleDeleteTeam = (teamName) => {
     deleteTeam(teamName, () => {
-      getTeams(setTeams)
+      getTeams(setTeams).catch((error) => {
+        console.error(error)
+      })
+    }).catch((error) => {
+      console.error(error)
+      alert(error.message)
     })
   }
 
@@ -187,9 +216,6 @@ function Home() {
       >
         Start Presentations
       </button>
-    <button onClick={getAccessToken}>
-      Get Token
-    </button>
     </main>
 
     
