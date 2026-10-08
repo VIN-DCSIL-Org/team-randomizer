@@ -2,12 +2,29 @@ import './App.css'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { fetchAuthSession } from 'aws-amplify/auth'
+async function getAccessToken() {
+  try {
+    const session = await fetchAuthSession()
 
+    const accessToken = session.tokens?.accessToken?.toString()
 
-function getTeams(setTeams) {
-  fetch('http://localhost:8000/teamstxt')
+    console.log(accessToken)
+  } catch (error) {
+    console.error('Could not get token:', error)
+  }
+}
+
+async function getTeams(setTeams) {
+
+  fetch('http://localhost:8000/teamstxt', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
     .then((response) => response.json())
     .then((data) => setTeams(data))
+    
 }
 
 function createTeam(teamName, onSuccess) {
@@ -170,7 +187,12 @@ function Home() {
       >
         Start Presentations
       </button>
+    <button onClick={getAccessToken}>
+      Get Token
+    </button>
     </main>
+
+    
   )
 }
 
