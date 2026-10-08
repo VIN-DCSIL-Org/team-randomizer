@@ -12,7 +12,6 @@ data "aws_apigatewayv2_apis" "check_access" {}
 data "aws_ecr_image" "lambda" {
   repository_name = var.lambda_ecr_repository
   image_tag       = var.lambda_image_tag
-  most_recent     = true
 }
 
 output "apigatewayv2_access_check" {
@@ -23,6 +22,14 @@ output "apigatewayv2_access_check" {
 resource "aws_apigatewayv2_api" "this" {
   name          = "team-randomizer-api"
   protocol_type = "HTTP"
+
+  cors_configuration {
+    allow_origins = ["https://*.dm3yb2zf1rkq0.amplifyapp.com"]
+    allow_methods = ["*"]
+    allow_headers = ["*"]
+    expose_headers = ["*"]
+    max_age        = 0
+  }
 }
 
 resource "aws_apigatewayv2_stage" "this" {
